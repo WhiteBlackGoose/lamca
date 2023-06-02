@@ -2,18 +2,31 @@ module Main where
 
 import Operations (vars, sub, alpha, beta, eta)
 import Types (VarName, Expression (Variable, Application, Abstraction))
-import Parser ( pAlpha , pLambda , pBraces , pExpr)
+import Parser (pExpr)
+import Text.Megaparsec (parse)
 
-import Data.Void (Void)
-import Text.Megaparsec (Parsec)
-import Text.Megaparsec.Char (char)
-type Parser = Parsec Void String
-mySequence :: Parser (Char, Char, Char)
-mySequence = do
-  a <- char 'a'
-  b <- char 'b'
-  c <- char 'c'
-  return (a, b, c)
+
+respond :: String -> String
+respond (r:' ':expr) = case r of
+  'a' -> mp2 alpha
+  'b' -> mp beta
+  'e' -> mp eta
+  'v' -> mp (show . vars)
+  _ -> "Unrecognized command: " ++ [r]
+  where 
+    p = parse pExpr ""
+    mp app = case p expr of
+      Left er -> "Error: \n" ++ show er
+      Right ex -> show $ app ex
+    w = p <$> words expr
+    mp2 app = 
+      case w of
+        [ Left er1, Left er2 ] -> "Two errors: \n" ++ show er1 ++ "\n" ++ show er2
+        [ Right _, Left er ] -> "One error: \n" ++ show er
+        [ Left er, Right _ ] -> "One error: \n" ++ show er
+        [ Right ex1, Right ex2 ] -> show $ app ex1 ex2
+        _ -> "Unexpected number of expressions"
+respond _ = "Format as: r:' ':expr"
 
 main :: IO ()
-main = putStrLn "Hello, Haskell!"
+main = interact respond

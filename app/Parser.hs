@@ -5,40 +5,30 @@ module Parser (
 , pExpr
 ) where
 
-import Text.Megaparsec (Parsec, some, single)
+import Text.Megaparsec ( Parsec, some, choice, satisfy )
 
 import Types (VarName, Expression (Variable, Application, Abstraction))
-import qualified Text.ParserCombinators.ReadPrec
-import Text.Read (Read(readPrec))
 import Data.Void (Void)
-import Text.Megaparsec.Byte (char, alphaNumChar)
-import Text.Megaparsec (choice)
+import Data.Char (isAsciiLower)
+import Text.Megaparsec.Char (char)
 
 type Parser = Parsec Void String
 
-data Result =
-  Valid Expression
-  | Error
-  deriving (Show)
-
-rmap f (Valid e) = Valid (f e)
-rmap _ err = err
-
 pAlpha :: Parser VarName
-pAlpha = choice $ map single ['a'..'z']
+pAlpha = satisfy isAsciiLower
 
 pLambda :: Parser (Expression -> Expression)
 pLambda = do
-  _ <- single '|'
+  _ <- choice [ char '|', char '\\' ]
   vs <- some pAlpha
-  _ <- single '.'
+  _ <- char '.'
   return $ foldl (.) id (map Abstraction vs)
 
 pBraces :: Parser Expression
 pBraces = do
-  _ <- single '('
+  _ <- char '('
   expr <- pExpr
-  _ <- single ')'
+  _ <- char ')'
   return expr
 
 pExpr :: Parser Expression
@@ -49,3 +39,4 @@ pExpr = do
     , Variable <$> pAlpha
     ]
   return $ foldl Application f st
+

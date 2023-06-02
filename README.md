@@ -6,6 +6,8 @@ To run it:
 nix develop github:WhiteBlackGoose/lamca --command cabal run
 ```
 
+![](./demo.gif)
+
 ## Syntax
 
 The following are examples

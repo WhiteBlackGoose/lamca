@@ -9,6 +9,7 @@ data Expression =
     Variable VarName
     | Abstraction VarName Expression
     | Application Expression Expression
+    deriving (Eq)
 
 instance Show Expression where
   show :: Expression -> String

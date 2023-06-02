@@ -1,15 +1,17 @@
 module OperationsTest (
   varsTests
 , subTests
+, alphaTests
 , betaTests
+, etaTests
 ) where
 import Test.HUnit (Assertion, Test (TestList, TestCase), assertEqual, assertFailure)
 import Parser (parse)
-import Operations (beta, vars, sub)
+import Operations (beta, vars, sub, alpha, eta)
 
 data TPair = String := String
 
-data TTriple = TPair :=> String
+data TTriple a = TPair :=> a
 
 varsTests = TestList $ map (TestCase . p) [
   -- expression      variables
@@ -27,9 +29,9 @@ varsTests = TestList $ map (TestCase . p) [
       _ -> assertFailure ("Parse error: " ++ s)
 
 subTests = TestList $ map (TestCase . p) [
-    "y" := "x" :=> "y"
-  , "x" := "x" :=> "x"
-  , "yx" := "|x.x" :=> "|x.x"
+    "y"  := "x"     :=> "y"
+  , "x"  := "x"     :=> "x"
+  , "yx" := "|x.x"  :=> "|x.x"
   , "yx" := "|y.yx" :=> "|a.a(yx)"
   ]
   where
@@ -38,6 +40,24 @@ subTests = TestList $ map (TestCase . p) [
         (Right e0, Right e1, Right e2) ->
           assertEqual "sub" (sub 'x' e0 e1) e2
         _ -> assertFailure "Parse error"
+
+alphaTests = TestList $ map (TestCase . p) [
+    "x" := "x" :=> True
+  , "y" := "x" :=> False
+  , "|x.x" := "|y.y" :=> True
+  , "|x.u" := "|y.y" :=> False
+  , "|xy.xy" := "|yx.yx" :=> True
+  , "|xy.xyu" := "|yx.yxu" :=> True
+  , "|xy.xyu" := "|yx.xyu" :=> False
+  , "x(|x.x)" := "y(|y.y)" :=> False
+  , "y(|x.x)" := "y(|y.y)" :=> True
+  ]
+  where
+    p (s1 := s2 :=> out) =
+      case (parse s1, parse s2) of
+        (Right e1, Right e2) ->
+          assertEqual "alpha" (alpha e1 e2) out
+        _ -> assertFailure ("Parse error: " ++ s1 ++ " " ++ s2)
 
 betaTests = TestList $ map (TestCase . p) [
   -- input              beta reduced
@@ -61,4 +81,19 @@ betaTests = TestList $ map (TestCase . p) [
           assertEqual ("β("++s1++")!="++s2) (beta e1) e2
         _ -> assertFailure ("Parse error: " ++ s1 ++ " " ++ s2)
 
-
+etaTests = TestList $ map (TestCase . p) [
+    "x"              := "x"
+  , "yx"             := "yx"
+  , "|x.yx"          := "y"
+  , "|x.xy"          := "|x.xy"
+  , "|x.yux"         := "yu"
+  , "|x.(|u.yu)x"      := "y"
+  , "|x.(|u.(|abc.ycba)u)x"  := "(|abc.ycba)"
+  , "|xuabc.ycbauxc" := "|xuab.ycbaux"
+  ]
+  where
+    p (s1 := s2) =
+      case (parse s1, parse s2) of
+        (Right e1, Right e2) ->
+          assertEqual ("η("++s1++")!="++s2) (eta e1) e2
+        _ -> assertFailure ("Parse error: " ++ s1 ++ " " ++ s2)

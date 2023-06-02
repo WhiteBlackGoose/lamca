@@ -50,7 +50,17 @@ beta (Application expr value) = case beta expr of
   other -> Application other (beta value)
 
 eta :: Expression -> Expression
-eta (Abstraction x (Application expr (Variable x'))) | x == x' = expr
-eta (Abstraction x ex) = Abstraction x (eta ex)
-eta (Application a b) = Application (eta a) (eta b)
+eta (Abstraction x ex) =
+  case eta ex of
+    (Application expr (Variable x')) | x == x' -> eta expr
+    other -> Abstraction x other
+eta (Application a b) =
+  let
+    a' = eta a
+    b' = eta b
+  in
+    if a' == a && b' == b then
+      Application a b
+    else
+      eta $ Application (eta a) (eta b)
 eta other = other

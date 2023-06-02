@@ -20,6 +20,7 @@ parserTestSuccess = TestList $ map TestCase [
   , pe "(|x.x)yxz"   $ a (a (a (l 'x' (v 'x')) (v 'y')) (v 'x')) (v 'z')
   , pe "(|x.x)y(xz)" $ a (a (l 'x' (v 'x')) (v 'y')) (a (v 'x') (v 'z'))
   , pe "|xy.xy"      $ l 'x' (l 'y' (a (v 'x') (v 'y')))
+  , pe "a|x.x|y.y"   $ a (v 'a') (l 'x' (a (v 'x')(l 'y' (v 'y'))))
   ]
   where
     p = parse

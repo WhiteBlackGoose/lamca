@@ -1,7 +1,7 @@
 module Main where
 import Test.HUnit (Assertion, runTestTT, Counts (Counts))
 import ParserTest (parserTestSuccess, parserTestFailures)
-import OperationsTest (varsTests, subTests, betaTests)
+import OperationsTest (varsTests, subTests, alphaTests, betaTests, etaTests)
 import Control.Monad (forM, foldM, (<=<))
 import Data.Foldable (traverse_)
 
@@ -12,5 +12,6 @@ main = traverse_ (print <=< runTestTT) [
     , varsTests
     , subTests
     , betaTests
+    , etaTests
     ]
 

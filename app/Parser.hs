@@ -1,5 +1,8 @@
 module Parser (
-  pLambda    
+  pAlpha
+, pLambda
+, pBraces
+, pExpr
 ) where
 
 import Text.Megaparsec (Parsec, some, single)
@@ -31,3 +34,18 @@ pLambda = do
   _ <- single '.'
   return $ foldl (.) id (map Abstraction vs)
 
+pBraces :: Parser Expression
+pBraces = do
+  _ <- single '('
+  expr <- pExpr
+  _ <- single ')'
+  return expr
+
+pExpr :: Parser Expression
+pExpr = do
+  f:st <- some $ choice [
+    pBraces
+    , pLambda <*> pExpr
+    , Variable <$> pAlpha
+    ]
+  return $ foldl Application f st

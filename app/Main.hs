@@ -2,7 +2,7 @@ module Main where
 
 import Operations (vars, sub, alpha, beta, eta)
 import Types (VarName, Expression (Variable, Application, Abstraction))
-import Parser (pLambda)
+import Parser ( pAlpha , pLambda , pBraces , pExpr)
 
 import Data.Void (Void)
 import Text.Megaparsec (Parsec)

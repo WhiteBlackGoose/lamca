@@ -44,9 +44,9 @@ alpha _ _ = False
 beta :: Expression -> Expression
 beta (Variable x) = Variable x
 beta (Abstraction x expr) = Abstraction x (beta expr)
-beta (Application (Abstraction x body) value) =
-  beta (sub x value body)
-beta (Application expr value) = Application expr value
+beta (Application expr value) = case beta expr of
+  Abstraction x body ->  beta (sub x value body)
+  other -> Application other (beta value)
 
 eta :: Expression -> Expression
 eta (Abstraction x (Application expr (Variable x'))) | x == x' = expr 

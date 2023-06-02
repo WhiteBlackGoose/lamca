@@ -1,11 +1,9 @@
 module Parser (
-  pAlpha
-, pLambda
-, pBraces
-, pExpr
+  parse
 ) where
 
-import Text.Megaparsec ( Parsec, some, choice, satisfy )
+import Text.Megaparsec ( Parsec, some, choice, satisfy, MonadParsec (eof) )
+import qualified Text.Megaparsec (parse)
 
 import Types (VarName, Expression (Variable, Application, Abstraction))
 import Data.Void (Void)
@@ -40,3 +38,4 @@ pExpr = do
     ]
   return $ foldl Application f st
 
+parse = Text.Megaparsec.parse (pExpr <* eof :: Parser Expression) ""

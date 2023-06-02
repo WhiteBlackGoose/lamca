@@ -1,25 +1,22 @@
 module Main where
 
 import Operations (vars, sub, alpha, beta, eta)
-import Types (VarName, Expression (Variable, Application, Abstraction))
-import Parser (pExpr)
-import Text.Megaparsec (parse)
+import Parser (parse)
 import Control.Monad (forever)
 
 
 respond :: String -> String
 respond (r:' ':expr) = case r of
-  'a' -> mp2 (p <$> words expr) alpha
+  'a' -> mp2 (parse <$> words expr) alpha
   'b' -> mp beta
   'e' -> mp eta
   'v' -> mp (show . vars)
   's' -> case expr of
-    x:' ':rest -> mp2 (p <$> words rest) (sub x)
+    x:' ':rest -> mp2 (parse <$> words rest) (sub x)
     _ -> "Substitute requires a certain syntax"
   _ -> "Unrecognized command: " ++ [r]
   where
-    p = parse pExpr ""
-    mp app = case p expr of
+    mp app = case parse expr of
       Left er -> "Error: \n" ++ show er
       Right ex -> show $ app ex
     mp2 w app =

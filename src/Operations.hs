@@ -7,11 +7,12 @@ module Operations (
 ) where
 
 import Types (VarName, Expression (Variable, Application, Abstraction))
+import Data.List (union)
 
 vars :: Expression -> [VarName]
 vars (Variable v) = [v]
 vars (Abstraction x ex) = filter (/=x) . vars $ ex
-vars (Application a b) = vars a ++ vars b
+vars (Application a b) = vars a `union` vars b
 
 sub :: VarName -> Expression -> Expression -> Expression
 sub x expr (Variable y)
@@ -49,7 +50,7 @@ beta (Application expr value) = case beta expr of
   other -> Application other (beta value)
 
 eta :: Expression -> Expression
-eta (Abstraction x (Application expr (Variable x'))) | x == x' = expr 
+eta (Abstraction x (Application expr (Variable x'))) | x == x' = expr
 eta (Abstraction x ex) = Abstraction x (eta ex)
 eta (Application a b) = Application (eta a) (eta b)
 eta other = other

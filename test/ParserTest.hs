@@ -3,9 +3,8 @@ module ParserTest (
 , parserTestFailures
 ) where
 import Test.HUnit (Assertion, assertEqual, Test (TestCase), assertBool)
-import Parser (pExpr)
+import Parser (parse)
 import Types (Expression(..))
-import Text.Megaparsec (parse)
 import Test.HUnit.Base (Test(TestList))
 
 parserTestSuccess = TestList $ map TestCase [
@@ -23,7 +22,7 @@ parserTestSuccess = TestList $ map TestCase [
   , pe "|xy.xy"      $ l 'x' (l 'y' (a (v 'x') (v 'y')))
   ]
   where
-    p = parse pExpr ""
+    p = parse
     l = Abstraction
     a = Application
     v = Variable
@@ -42,4 +41,4 @@ parserTestFailures = TestList $ map TestCase [
   , u "()"
   ]
   where
-    u e = assertBool e $ case parse pExpr "" e of Left _ -> True; Right _ -> False
+    u e = assertBool e $ case parse e of Left _ -> True; Right _ -> False

@@ -16,18 +16,11 @@ pAlpha :: Parser VarName
 pAlpha = satisfy isAsciiLower
 
 pLambda :: Parser (Expression -> Expression)
-pLambda = do
-  _ <- choice [ char '|', char '\\' ]
-  vs <- some pAlpha
-  _ <- char '.'
-  return $ foldl (.) id (map Abstraction vs)
+pLambda = foldl (.) id . map Abstraction
+    <$> (choice [ char '|', char '\\' ] *> some pAlpha <* char '.')
 
 pBraces :: Parser Expression
-pBraces = do
-  _ <- char '('
-  expr <- pExpr
-  _ <- char ')'
-  return expr
+pBraces = char '(' *> pExpr <* char ')'
 
 pExpr :: Parser Expression
 pExpr = do
